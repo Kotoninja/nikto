@@ -40,7 +40,7 @@ INSTALLED_APPS = (
     ]
     + [
         # My apps
-        "comment"
+        "message"
     ]
     + [
         # Third-party

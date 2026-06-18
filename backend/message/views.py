@@ -1,21 +1,21 @@
 # from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.response import Response
-from comment.models import Comment
-from comment.serializers import CommentSerializer
+from message.models import Message
+from message.serializers import MessageSerializer
 from rest_framework import status
 
 
-class CommentAPI(viewsets.ModelViewSet):
-    serializer_class = CommentSerializer
-    queryset = Comment.objects.all()
+class MessageAPI(viewsets.ModelViewSet):
+    serializer_class = MessageSerializer
+    queryset = Message.objects.all()
 
-    def preform_create(self, serializer: CommentSerializer):
+    def preform_create(self, serializer: MessageSerializer):
         serializer.save()
 
     def list(self, request):
-        comments = self.get_queryset()
-        serializer = self.get_serializer(comments, many=True)
+        messages = self.get_queryset()
+        serializer = self.get_serializer(messages, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
