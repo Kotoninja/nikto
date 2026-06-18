@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+
 from config.env import BASE_DIR, env
 
 env.read_env(os.path.join(BASE_DIR.parent, ".env"))
