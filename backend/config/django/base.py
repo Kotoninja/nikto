@@ -140,3 +140,4 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 from config.settings.rest_framework import *
+from config.settings.redis import *

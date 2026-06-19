@@ -50,12 +50,12 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-  # redis:
-  #   image: redis:alpine
-  #   networks:
-  #     - webnet
-  #   ports: 
-  #   - "6379:6379"
+  redis:
+    image: redis:alpine
+    networks:
+      - webnet_nikto
+    ports: 
+    - "6379:6379"
 
 networks:
   webnet_nikto:
