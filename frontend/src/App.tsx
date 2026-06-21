@@ -8,7 +8,6 @@ import {
   Box,
   Alert,
   Stack,
-  Avatar,
   Divider,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
@@ -19,6 +18,7 @@ import { MessageField } from "./components/MessageField";
 
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { CircularProgress, Box as MuiBox, Fade } from "@mui/material";
+import { useIntersectionObserver } from "@siberiacancode/reactuse";
 
 // Создаем тему
 const theme = createTheme({
@@ -36,6 +36,7 @@ const App: React.FC = () => {
   const [messages, setMessages] = useState<MessageInterface[]>([]);
   const [inputMessage, setInputMessage] = useState<string>("");
   const [username, setUsername] = useState<string>("Anonymous");
+  const [linkPagination, setLinkPagination] = useState<string>("");
 
   // Loading
   const [loadingFetchMessages, setLoadingFetchMessages] =
@@ -121,7 +122,10 @@ const App: React.FC = () => {
   const fetchMessages = () => {
     return api
       .get("all")
-      .then((response) => setMessages(response?.data?.results))
+      .then(function (response) {
+        setMessages(response?.data?.results);
+        setLinkPagination(response?.data?.next);
+      })
       .catch(console.error)
       .finally(() => {
         setLoadingFetchMessages(false);
@@ -143,6 +147,7 @@ const App: React.FC = () => {
   const progressIntervalRef = React.useRef<ReturnType<
     typeof setInterval
   > | null>(null);
+  const [isInitialScrollDone, setIsInitialScrollDone] = useState(false);
 
   const [showJumpButton, setShowJumpButton] = useState(false);
   const [progress, setProgress] = useState(100); // % до автоскролла
@@ -204,15 +209,68 @@ const App: React.FC = () => {
     scrollToBottom(true);
   };
 
+  // Начальный скролл вниз после первой загрузки сообщений.
+  // Пагинация разблокируется только ПОСЛЕ того, как скролл реально применён.
   useEffect(() => {
+    if (loadingFetchMessages) return;
+
+    if (!isInitialScrollDone) {
+      scrollToBottom(false); // мгновенно, без анимации, при первом заходе
+      // ждём два кадра, чтобы браузер точно успел применить scrollTop
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsInitialScrollDone(true);
+        });
+      });
+      return;
+    }
+
     if (!isUserScrollingRef.current) {
       scrollToBottom(true);
     }
-  }, [messages]);
+  }, [messages, loadingFetchMessages, isInitialScrollDone]);
 
   useEffect(() => {
     return () => clearTimers();
   }, []);
+
+  // Pagination trigger
+  const fetchNextPage = () => {
+    if (!linkPagination || loadingPagination) return;
+    const el = scrollContainerRef.current;
+    const prevScrollHeight = el?.scrollHeight ?? 0;
+
+    setLoadingPagination(true);
+    api
+      .get(linkPagination)
+      .then(function (response) {
+        setMessages((prev) => [...(response?.data?.results ?? []), ...prev]);
+        setLinkPagination(response?.data?.next);
+        requestAnimationFrame(() => {
+          if (el) {
+            const newScrollHeight = el.scrollHeight;
+            el.scrollTop += newScrollHeight - prevScrollHeight;
+          }
+        });
+      })
+      .catch(console.error)
+      .finally(() => {
+        setLoadingPagination(false);
+      });
+  };
+
+  const { ref } = useIntersectionObserver<HTMLDivElement>({
+    threshold: 1,
+    onChange: (entry) => {
+      if (
+        entry[0].isIntersecting &&
+        !loadingFetchMessages &&
+        isInitialScrollDone
+      ) {
+        fetchNextPage();
+      }
+    },
+  });
 
   return (
     <ThemeProvider theme={theme}>
@@ -268,7 +326,10 @@ const App: React.FC = () => {
             {loadingFetchMessages ? (
               <CircularProgress aria-label="Loading…" />
             ) : (
-              <Stack spacing={2}>{messagesList}</Stack>
+              <Stack spacing={2}>
+                {linkPagination && <div ref={ref} style={{ height: 1 }} />}
+                {messagesList}
+              </Stack>
             )}
           </Box>
 
