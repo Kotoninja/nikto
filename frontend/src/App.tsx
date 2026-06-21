@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Paper,
@@ -13,6 +13,12 @@ import {
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import api from "../api";
+import { type MessageInterface } from "./types/chat";
+import { MessageField } from "./components/MessageField";
+
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { CircularProgress, Box as MuiBox, Fade } from "@mui/material";
 
 // Создаем тему
 const theme = createTheme({
@@ -26,30 +32,42 @@ const theme = createTheme({
   },
 });
 
-// Интерфейс для сообщения
-interface Message {
-  id: number;
-  text: string;
-  timestamp: Date;
-  username: string;
-}
-
 const App: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<MessageInterface[]>([]);
   const [inputMessage, setInputMessage] = useState<string>("");
   const [username, setUsername] = useState<string>("Anonymous");
+
+  // Loading
+  const [loadingFetchMessages, setLoadingFetchMessages] =
+    useState<boolean>(true);
+  const [loadingSendMessage, setLoadingSendMessage] = useState<boolean>(false);
+  const [loadingPagination, setLoadingPagination] = useState<boolean>(false);
 
   // Обработчик отправки сообщения
   const handleSendMessage = (): void => {
     if (inputMessage.trim()) {
-      const newMessage: Message = {
-        id: messages.length + 1,
-        text: inputMessage.trim(),
-        timestamp: new Date(),
-        username: username || "Anonymous",
-      };
-      setMessages([...messages, newMessage]);
-      setInputMessage("");
+      setLoadingSendMessage(true);
+      api
+        .post("create", { username: username, text: inputMessage.trim() })
+        .then(function (response) {
+          const messageDetail = response?.data;
+          const newMessage: MessageInterface = {
+            id: messageDetail.id,
+            text: messageDetail.text,
+            timestamp: messageDetail.timestamp,
+            username: username || "Anonymous",
+          };
+          setMessages([...messages, newMessage]);
+          setInputMessage("");
+
+          isUserScrollingRef.current = false;
+          setShowJumpButton(false);
+          clearTimers();
+        })
+        .catch(console.error)
+        .finally(() => {
+          setLoadingSendMessage(false);
+        });
     }
   };
 
@@ -62,11 +80,11 @@ const App: React.FC = () => {
   };
 
   // Форматирование времени
-  const formatTime = (date: Date): string => {
+  const formatTime = (timestamp: string): string => {
     return new Intl.DateTimeFormat("ru-RU", {
       hour: "2-digit",
       minute: "2-digit",
-    }).format(date);
+    }).format(new Date(timestamp));
   };
 
   // Получение цвета аватара на основе имени
@@ -88,6 +106,114 @@ const App: React.FC = () => {
     return colors[Math.abs(hash) % colors.length];
   };
 
+  const messagesList = messages?.map((message) => (
+    <MessageField
+      key={message.id}
+      id={message.id}
+      text={message.text}
+      timestamp={message.timestamp}
+      username={message.username}
+      getAvatarColor={getAvatarColor}
+      formatTime={formatTime}
+    />
+  ));
+
+  const fetchMessages = () => {
+    return api
+      .get("all")
+      .then((response) => setMessages(response?.data?.results))
+      .catch(console.error)
+      .finally(() => {
+        setLoadingFetchMessages(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+
+  // Down button
+  const INACTIVITY_MS = 5000;
+
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const isUserScrollingRef = React.useRef(false);
+  const inactivityTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const progressIntervalRef = React.useRef<ReturnType<
+    typeof setInterval
+  > | null>(null);
+
+  const [showJumpButton, setShowJumpButton] = useState(false);
+  const [progress, setProgress] = useState(100); // % до автоскролла
+
+  const scrollToBottom = (smooth = true) => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "auto" });
+  };
+
+  const isNearBottom = (): boolean => {
+    const el = scrollContainerRef.current;
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 50;
+  };
+
+  const clearTimers = () => {
+    if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+  };
+
+  const startInactivityCountdown = () => {
+    clearTimers();
+    setProgress(100);
+
+    const startTime = Date.now();
+    progressIntervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, 100 - (elapsed / INACTIVITY_MS) * 100);
+      setProgress(remaining);
+    }, 100);
+
+    inactivityTimerRef.current = setTimeout(() => {
+      if (progressIntervalRef.current)
+        clearInterval(progressIntervalRef.current);
+      isUserScrollingRef.current = false;
+      setShowJumpButton(false);
+      scrollToBottom(true);
+    }, INACTIVITY_MS);
+  };
+
+  const handleScroll = () => {
+    if (isNearBottom()) {
+      isUserScrollingRef.current = false;
+      setShowJumpButton(false);
+      clearTimers();
+      return;
+    }
+
+    isUserScrollingRef.current = true;
+    setShowJumpButton(true);
+    startInactivityCountdown();
+  };
+
+  const handleJumpClick = () => {
+    isUserScrollingRef.current = false;
+    setShowJumpButton(false);
+    clearTimers();
+    scrollToBottom(true);
+  };
+
+  useEffect(() => {
+    if (!isUserScrollingRef.current) {
+      scrollToBottom(true);
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    return () => clearTimers();
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <Container maxWidth="md" sx={{ height: "100vh", py: 3 }}>
@@ -97,6 +223,7 @@ const App: React.FC = () => {
             height: "100%",
             display: "flex",
             flexDirection: "column",
+            position: "relative",
             p: 3,
             borderRadius: 2,
           }}
@@ -122,6 +249,8 @@ const App: React.FC = () => {
 
           {/* Область сообщений */}
           <Box
+            ref={scrollContainerRef}
+            onScroll={!loadingFetchMessages ? handleScroll : undefined}
             sx={{
               flex: 1,
               overflowY: "auto",
@@ -131,64 +260,70 @@ const App: React.FC = () => {
               borderRadius: 1,
               minHeight: 200,
               maxHeight: "calc(100vh - 350px)",
+              display: loadingFetchMessages ? "flex" : "block",
+              alignItems: loadingFetchMessages ? "center" : undefined,
+              justifyContent: loadingFetchMessages ? "center" : undefined,
             }}
           >
-            <Stack spacing={2}>
-              {messages.map((msg) => (
-                <Box
-                  key={msg.id}
-                  sx={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 2,
-                  }}
-                >
-                  <Avatar
-                    sx={{
-                      bgcolor: getAvatarColor(msg.username),
-                      width: 36,
-                      height: 36,
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    {msg.username.charAt(0).toUpperCase()}
-                  </Avatar>
-                  <Box sx={{ flex: 1 }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        mb: 0.5,
-                      }}
-                    >
-                      <Typography variant="subtitle2" fontWeight="bold">
-                        {msg.username}
-                      </Typography>
-                      <Typography variant="caption" color="textSecondary">
-                        {formatTime(msg.timestamp)}
-                      </Typography>
-                    </Box>
-                    <Paper
-                      sx={{
-                        p: 1.5,
-                        bgcolor:
-                          msg.username === "System" ? "#e3f2fd" : "white",
-                        borderRadius: 2,
-                      }}
-                    >
-                      <Typography
-                        variant="body1"
-                        sx={{ wordWrap: "break-word" }}
-                      >
-                        {msg.text}
-                      </Typography>
-                    </Paper>
-                  </Box>
-                </Box>
-              ))}
-            </Stack>
+            {loadingFetchMessages ? (
+              <CircularProgress aria-label="Loading…" />
+            ) : (
+              <Stack spacing={2}>{messagesList}</Stack>
+            )}
           </Box>
+
+          {/* Down button */}
+          <Fade in={showJumpButton}>
+            <Box
+              onClick={handleJumpClick}
+              sx={{
+                position: "absolute",
+                bottom: 185,
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 1,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 5,
+                bgcolor: "primary.main",
+                color: "white",
+                boxShadow: 3,
+                fontSize: 15,
+                fontWeight: 500,
+                "&:hover": { bgcolor: "primary.dark" },
+              }}
+            >
+              <MuiBox
+                sx={{
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <CircularProgress
+                  variant="determinate"
+                  value={progress}
+                  size={20}
+                  thickness={5}
+                  sx={{ color: "white", opacity: 0.6 }}
+                />
+                <KeyboardArrowDownIcon
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    fontSize: 14,
+                  }}
+                />
+              </MuiBox>
+              Новые сообщения
+            </Box>
+          </Fade>
 
           {/* Поле ввода сообщения */}
           <Box sx={{ display: "flex", gap: 2, alignItems: "flex-end" }}>
@@ -219,6 +354,7 @@ const App: React.FC = () => {
                 borderRadius: 2,
                 gap: 1,
               }}
+              loading={loadingSendMessage}
               endIcon={<SendIcon />}
             >
               Отправить
