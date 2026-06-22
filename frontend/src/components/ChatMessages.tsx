@@ -30,7 +30,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   getAvatarColor,
 }) => {
   const { ref } = useIntersectionObserver<HTMLDivElement>({
-    threshold: 1,
+    threshold: 0,
     onChange: (entry) => {
       if (
         entry[0].isIntersecting &&
