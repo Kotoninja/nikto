@@ -38,7 +38,7 @@ export function MessageField({
           }}
         >
           {/* <Typography variant="subtitle2" fontWeight="bold"> */}
-            {username}
+          {username}
           {/* </Typography> */}
           <Typography variant="caption" color="textSecondary">
             {formatTime(String(timestamp))}
