@@ -105,7 +105,7 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Container maxWidth="md" sx={{ height: "100vh", py: 3 }}>
+      <Container maxWidth="md" sx={{ height: "100%"}}>
         <Paper
           elevation={3}
           sx={{
