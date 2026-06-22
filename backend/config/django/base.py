@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = (
     [  # Django apps
+        "daphne",
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
@@ -51,7 +52,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware", # Cors-Headers Middleware  
+    "corsheaders.middleware.CorsMiddleware",  # Cors-Headers Middleware
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -144,3 +145,4 @@ STATIC_URL = "static/"
 from config.settings.rest_framework import *
 from config.settings.redis import *
 from config.settings.cors_headers import *
+from config.settings.daphe import *
