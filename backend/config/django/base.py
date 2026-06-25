@@ -145,4 +145,4 @@ STATIC_URL = "static/"
 from config.settings.rest_framework import *
 from config.settings.redis import *
 from config.settings.cors_headers import *
-from config.settings.daphe import *
+from config.settings.channels import *
