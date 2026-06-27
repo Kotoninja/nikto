@@ -19,7 +19,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         try:
             text_data_json: dict = json.loads(text_data)
-            message: str | None = text_data_json.get("message")
+            text: str | None = text_data_json.get("text")
             username: str | None = text_data_json.get("username")
 
             if not username or not username.strip():
@@ -33,7 +33,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
                 return
 
-            if not message or not message.strip():
+            if not text or not text.strip():
                 await self.send(
                     text_data=json.dumps(
                         {"status": "error", "error": "Please provide a message to send"}
@@ -41,9 +41,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
                 return
 
-            new_message: Message = await self.save_message(
-                username=username, text=message
-            )
+            new_message: Message = await self.save_message(username=username, text=text)
 
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -51,7 +49,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "type": "chat.message",
                     "id": new_message.pk,
                     "username": new_message.username,
-                    "message": new_message.text,
+                    "text": new_message.text,
                     "timestamp": json.dumps(new_message.timestamp, default=str),
                 },
             )
@@ -69,7 +67,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 {
                     "id": event["id"],
                     "username": event["username"],
-                    "message": event["message"],
+                    "text": event["text"],
                     "timestamp": event["timestamp"],
                 }
             )
