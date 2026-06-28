@@ -17,6 +17,8 @@ import { useChatScroll } from "./hooks/useChatScroll";
 import { ChatMessages } from "./components/ChatMessages";
 import { JumpToBottomButton } from "./components/JumpToBottomButton";
 
+import { useWebSocket } from "./hooks/useWebSockets";
+
 const theme = createTheme({
   palette: {
     primary: { main: "#1976d2" },
@@ -27,6 +29,9 @@ const theme = createTheme({
 // Форматирование времени
 const formatTime = (timestamp: string): string =>
   new Intl.DateTimeFormat("ru-RU", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(timestamp));
@@ -58,42 +63,34 @@ const App: React.FC = () => {
     messages,
     linkPagination,
     loadingFetchMessages,
-    loadingSendMessage,
     loadingPagination,
-    setLoadingSendMessage,
+    setMessages,
     fetchMessages,
-    sendMessage,
     fetchNextPage,
   } = useChatMessages();
 
   const {
     scrollContainerRef,
-    isUserScrollingRef,
     isInitialScrollDone,
+    justSentRef,
     showJumpButton,
     progress,
     handleScroll,
     handleJumpClick,
-    clearTimers,
   } = useChatScroll(messages, loadingFetchMessages);
 
   useEffect(() => {
     fetchMessages();
   }, []);
 
-  const handleSendMessage = (): void => {
+  const { sendMessage } = useWebSocket(setMessages);
+
+  const handleSendMessage = async (): Promise<void> => {
     if (!inputMessage.trim()) return;
 
-    setLoadingSendMessage(true);
-    sendMessage(inputMessage.trim(), username)
-      .then(() => {
-        setInputMessage("");
-        isUserScrollingRef.current = false;
-        clearTimers();
-      })
-      .finally(() => {
-        setLoadingSendMessage(false);
-      });
+    sendMessage(inputMessage.trim(), username);
+    justSentRef.current = true;
+    setInputMessage("");
   };
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -105,7 +102,7 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Container maxWidth="md" sx={{ height: "100%"}}>
+      <Container maxWidth="md" sx={{ height: "100%" }}>
         <Paper
           elevation={3}
           sx={{
@@ -176,7 +173,6 @@ const App: React.FC = () => {
               onClick={handleSendMessage}
               disabled={!inputMessage.trim() || !username}
               sx={{ minWidth: 100, height: 56, borderRadius: 2, gap: 1 }}
-              loading={loadingSendMessage}
               endIcon={<SendIcon />}
             >
               Отправить

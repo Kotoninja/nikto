@@ -14,15 +14,20 @@ export const useChatScroll = (
   const progressIntervalRef = React.useRef<ReturnType<
     typeof setInterval
   > | null>(null);
+  const justSentRef = React.useRef(false);
 
   const [isInitialScrollDone, setIsInitialScrollDone] = useState(false);
   const [showJumpButton, setShowJumpButton] = useState(false);
   const [progress, setProgress] = useState(100);
 
-  const scrollToBottom = (smooth = true) => {
+  const scrollToBottom = () => {
     const el = scrollContainerRef.current;
     if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "auto" });
+
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: "auto",
+    });
   };
 
   const isNearBottom = (): boolean => {
@@ -52,7 +57,7 @@ export const useChatScroll = (
         clearInterval(progressIntervalRef.current);
       isUserScrollingRef.current = false;
       setShowJumpButton(false);
-      scrollToBottom(true);
+      scrollToBottom();
     }, INACTIVITY_MS);
   };
 
@@ -72,15 +77,14 @@ export const useChatScroll = (
     isUserScrollingRef.current = false;
     setShowJumpButton(false);
     clearTimers();
-    scrollToBottom(true);
+    scrollToBottom();
   };
 
-  // Начальный скролл вниз + разблокировка пагинации после него
   useEffect(() => {
     if (loadingFetchMessages) return;
 
     if (!isInitialScrollDone) {
-      scrollToBottom(false);
+      scrollToBottom();
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           setIsInitialScrollDone(true);
@@ -89,12 +93,20 @@ export const useChatScroll = (
       return;
     }
 
+    if (justSentRef.current) {
+      justSentRef.current = false;
+      isUserScrollingRef.current = false;
+      setShowJumpButton(false);
+      clearTimers();
+      scrollToBottom();
+      return;
+    }
+
     if (!isUserScrollingRef.current) {
-      scrollToBottom(true);
+      scrollToBottom();
     }
   }, [messages, loadingFetchMessages, isInitialScrollDone]);
 
-  // Чистим таймеры при размонтировании
   useEffect(() => {
     return () => clearTimers();
   }, []);
@@ -102,6 +114,7 @@ export const useChatScroll = (
   return {
     scrollContainerRef,
     isUserScrollingRef,
+    justSentRef,
     isInitialScrollDone,
     showJumpButton,
     progress,

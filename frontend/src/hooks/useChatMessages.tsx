@@ -7,7 +7,6 @@ export const useChatMessages = () => {
   const [linkPagination, setLinkPagination] = useState<string>("");
   const [loadingFetchMessages, setLoadingFetchMessages] =
     useState<boolean>(true);
-  const [loadingSendMessage, setLoadingSendMessage] = useState<boolean>(false);
   const [loadingPagination, setLoadingPagination] = useState<boolean>(false);
 
   const fetchMessages = () => {
@@ -21,22 +20,6 @@ export const useChatMessages = () => {
       .finally(() => {
         setLoadingFetchMessages(false);
       });
-  };
-
-  const sendMessage = (text: string, username: string) => {
-    return api
-      .post("create", { username, text })
-      .then((response) => {
-        const messageDetail = response?.data;
-        const newMessage: MessageInterface = {
-          id: messageDetail.id,
-          text: messageDetail.text,
-          timestamp: messageDetail.timestamp,
-          username: username || "Anonymous",
-        };
-        setMessages((prev) => [...prev, newMessage]);
-      })
-      .catch(console.error);
   };
 
   const fetchNextPage = (
@@ -70,11 +53,9 @@ export const useChatMessages = () => {
     messages,
     linkPagination,
     loadingFetchMessages,
-    loadingSendMessage,
     loadingPagination,
-    setLoadingSendMessage,
     fetchMessages,
-    sendMessage,
     fetchNextPage,
+    setMessages,
   };
 };
