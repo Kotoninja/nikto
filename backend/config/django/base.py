@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+
 from config.env import BASE_DIR, env
 
 env.read_env(os.path.join(BASE_DIR.parent, ".env"))
@@ -31,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = (
     [  # Django apps
+        "daphne",
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
@@ -40,13 +42,17 @@ INSTALLED_APPS = (
     ]
     + [
         # My apps
+        "message"
     ]
     + [
-        # Third-party packages
+        # Third-party
+        "rest_framework",
+        "corsheaders",
     ]
 )
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # Cors-Headers Middleware
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -79,12 +85,25 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("POSTGRES_NAME"),
+        "USER": env("POSTGRES_USER"),
+        "PASSWORD": env("POSTGRES_PASSWORD"),
+        "HOST": env("POSTGRES_HOST"),
+        "PORT": env("POSTGRES_PORT"),
     }
 }
+
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 
 # Password validation
@@ -122,3 +141,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+from config.settings.rest_framework import *
+from config.settings.redis import *
+from config.settings.cors_headers import *
+from config.settings.channels import *
