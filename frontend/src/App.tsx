@@ -19,6 +19,8 @@ import { JumpToBottomButton } from "./components/JumpToBottomButton";
 
 import { useWebSocket } from "./hooks/useWebSockets";
 
+import ASCIIText from "../@/components/ASCIIText";
+
 const theme = createTheme({
   palette: {
     primary: { main: "#1976d2" },
@@ -114,10 +116,25 @@ const App: React.FC = () => {
             borderRadius: 2,
           }}
         >
-          <Typography variant="h4" component="h1" gutterBottom align="center">
-            💬 Чат
-          </Typography>
-
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              height: "200px",
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
+            <ASCIIText
+              text={username}
+              enableWaves
+              textColor="#39FF14"
+              asciiFontSize={2}
+            />
+          </Box>
           {/* Имя пользователя */}
           <Box sx={{ mb: 2 }}>
             <TextField
