@@ -19,8 +19,6 @@ import { JumpToBottomButton } from "./components/JumpToBottomButton";
 
 import { useWebSocket } from "./hooks/useWebSockets";
 
-import ASCIIText from "../@/components/ASCIIText";
-
 const theme = createTheme({
   palette: {
     primary: { main: "#000000" },
@@ -115,13 +113,11 @@ const App: React.FC = () => {
             p: 3,
             borderRadius: 4,
 
-            // Эффект премиального светлого стекла (Light Cyber-Glass)
             backgroundColor: "rgba(255, 255, 255, 0.75)",
             backdropFilter: "blur(20px)",
             border: "1px solid rgba(0, 0, 0, 0.08)",
             boxShadow: "0 20px 40px rgba(0, 0, 0, 0.08)",
 
-            // Мягкая светлая пиксельная текстура для заднего фона
             backgroundImage: `
             linear-gradient(rgba(0, 0, 0, 0.01) 1px, transparent 1px),
             linear-gradient(90deg, rgba(0, 0, 0, 0.01) 1px, transparent 1px)
@@ -129,25 +125,22 @@ const App: React.FC = () => {
             backgroundSize: "6px 6px",
           }}
         >
-          {/* Хедер с ником и ASCII-анимацией */}
-          {username}
-          {/* <Box
+          <Box
             sx={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
               width: "100%",
-              height: "300px",
+              height: "100px",
               overflow: "hidden",
               position: "relative",
               borderRadius: 3,
-              background:
-                "linear-gradient(180deg, rgba(0, 0, 0, 0.03) 0%, transparent 100%)",
               mb: 2,
             }}
           >
-          </Box> */}
+            {username}
+          </Box>
 
           {/* Ввод NIK-нейма */}
           <Box sx={{ mb: 2 }}>
@@ -175,17 +168,16 @@ const App: React.FC = () => {
 
           <Divider sx={{ my: 1, borderColor: "rgba(0, 0, 0, 0.08)" }} />
 
-          {/* СВЕТЛАЯ ОБЛАСТЬ ЧАТА С ЭФФЕКТОМ РАЗМЫТИЯ БЕЗ ПИКСЕЛЕЙ */}
           <Box
             sx={{
               flexGrow: 1,
+              minHeight: 0,
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
               my: 1,
               p: 2,
               borderRadius: 3,
-              // Матовое стекло без пиксельной сетки
               backgroundColor: "rgba(255, 255, 255, 0.45)",
               backdropFilter: "blur(25px)",
               border: "1px solid rgba(0, 0, 0, 0.06)",

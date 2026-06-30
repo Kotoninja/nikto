@@ -1,35 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" shape-rendering="crispEdges">
-  <!-- Chat bubble -->
-  <rect x="30" y="0" width="140" height="10" fill="#00ff88"/>
-  <rect x="10" y="10" width="180" height="10" fill="#00ff88"/>
-  <rect x="0" y="20" width="200" height="110" fill="#00ff88"/>
-  <rect x="0" y="130" width="200" height="20" fill="#00ff88"/>
-  <rect x="10" y="150" width="180" height="10" fill="#00ff88"/>
-  <!-- Tail -->
-  <rect x="20" y="160" width="70" height="10" fill="#00ff88"/>
-  <rect x="110" y="160" width="80" height="10" fill="#00ff88"/>
-  <rect x="20" y="170" width="40" height="10" fill="#00ff88"/>
-  <rect x="80" y="170" width="110" height="10" fill="#00ff88"/>
-  <rect x="20" y="180" width="20" height="10" fill="#00ff88"/>
-  <rect x="60" y="180" width="130" height="10" fill="#00ff88"/>
-  <rect x="50" y="190" width="140" height="10" fill="#00ff88"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100%" height="100%" style="image-rendering: pixelated; image-rendering: crisp-edges; shape-rendering: crispEdges;">
+  <!-- Темная подложка, чтобы был виден белый круг (можно удалить для прозрачного фона) -->
+  <rect width="24" height="24" fill="#121212"/>
 
-  <!-- Mask body -->
-  <rect x="40" y="35" width="120" height="10" fill="#003d1f"/>
-  <rect x="30" y="45" width="140" height="70" fill="#003d1f"/>
-  <rect x="40" y="115" width="40" height="10" fill="#003d1f"/>
-  <rect x="120" y="115" width="40" height="10" fill="#003d1f"/>
-  <rect x="40" y="125" width="20" height="10" fill="#003d1f"/>
-  <rect x="140" y="125" width="20" height="10" fill="#003d1f"/>
+  <!-- Белый пиксельный круг -->
+  <path fill="#FFFFFF" d="M7 1h10v1H7z M5 2h14v1H5z M4 3h16v1H4z M3 4h18v1H3z M2 5h20v1H2z M2 6h20v1H2z M1 7h22v1H1z M1 8h22v1H1z M1 9h22v1H1z M0 10h24v1H0z M0 11h24v1H0z M0 12h24v1H0z M0 13h24v1H0z M1 14h22v1H1z M1 15h22v1H1z M1 16h22v1H1z M2 17h20v1H2z M2 18h20v1H2z M3 19h18v1H3z M4 20h16v1H4z M5 21h14v1H5z M7 22h10v1H7z" />
 
-  <!-- Left eye -->
-  <rect x="40" y="60" width="50" height="30" fill="#00ff88"/>
-  <!-- Right eye -->
-  <rect x="110" y="60" width="50" height="30" fill="#00ff88"/>
-
-  <!-- Nose dot -->
-  <rect x="95" y="85" width="10" height="10" fill="#006633"/>
-
-  <!-- Highlight on mask -->
-  <rect x="50" y="37" width="30" height="6" fill="#005c2e"/>
+  <!-- Черный пиксельный человек (голова, шея и плечи) -->
+  <path fill="#000000" d="M10 5h4v1H10z M9 6h6v1H9z M9 7h6v1H9z M9 8h6v1H9z M9 9h6v1H9z M10 10h4v1H10z M11 11h2v1H11z M11 12h2v1H11z M9 13h6v1H9z M7 14h10v1H7z M5 15h14v1H5z M3 16h18v1H3z M2 17h20v1H2z M2 18h20v1H2z M3 19h18v1H3z M4 20h16v1H4z M5 21h14v1H5z M7 22h10v1H7z" />
 </svg>
