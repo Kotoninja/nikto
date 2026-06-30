@@ -26,8 +26,8 @@ services:
     ports:
       - "3000:3000"
     tty: true
-    # depends_on:
-      # - backend
+    depends_on:
+      - backend
   db:
     image: postgres:17-alpine
     volumes:
