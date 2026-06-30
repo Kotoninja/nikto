@@ -21,8 +21,8 @@ import { useWebSocket } from "./hooks/useWebSockets";
 
 const theme = createTheme({
   palette: {
-    primary: { main: "#1976d2" },
-    secondary: { main: "#dc004e" },
+    primary: { main: "#000000" },
+    secondary: { main: "#717171" },
   },
 });
 
@@ -39,14 +39,14 @@ const formatTime = (timestamp: string): string =>
 // Цвет аватара на основе имени
 const getAvatarColor = (name: string): string => {
   const colors = [
-    "#2196f3",
-    "#4caf50",
-    "#ff9800",
-    "#e91e63",
-    "#9c27b0",
-    "#3f51b5",
-    "#009688",
-    "#f44336",
+    "#f5f5f5",
+    "#d9d9d9",
+    "#bfbfbf",
+    "#8c8c8c",
+    "#595959",
+    "#404040",
+    "#262626",
+    "#0d0d0d",
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
@@ -102,23 +102,47 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Container maxWidth="md" sx={{ height: "100%" }}>
+      <Container maxWidth="md" sx={{ height: "100vh", py: 4 }}>
         <Paper
-          elevation={3}
+          elevation={0}
           sx={{
             height: "100%",
             display: "flex",
             flexDirection: "column",
             position: "relative",
             p: 3,
-            borderRadius: 2,
+            borderRadius: 4,
+
+            backgroundColor: "rgba(255, 255, 255, 0.75)",
+            backdropFilter: "blur(20px)",
+            border: "1px solid rgba(0, 0, 0, 0.08)",
+            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.08)",
+
+            backgroundImage: `
+            linear-gradient(rgba(0, 0, 0, 0.01) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 0, 0, 0.01) 1px, transparent 1px)
+          `,
+            backgroundSize: "6px 6px",
           }}
         >
-          <Typography variant="h4" component="h1" gutterBottom align="center">
-            💬 Чат
-          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              height: "100px",
+              overflow: "hidden",
+              position: "relative",
+              borderRadius: 3,
+              mb: 2,
+            }}
+          >
+            {username}
+          </Box>
 
-          {/* Имя пользователя */}
+          {/* Ввод NIK-нейма */}
           <Box sx={{ mb: 2 }}>
             <TextField
               fullWidth
@@ -127,24 +151,52 @@ const App: React.FC = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               size="small"
+              sx={{
+                backgroundColor: "rgba(0, 0, 0, 0.02)",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  color: "#1e293b",
+                  "& fieldset": { borderColor: "rgba(0, 0, 0, 0.15)" },
+                  "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.3)" },
+                  "&.Mui-focused fieldset": { borderColor: "#1976d2" },
+                },
+                "& .MuiInputLabel-root": { color: "rgba(0, 0, 0, 0.6)" },
+                "& .MuiInputLabel-root.Mui-focused": { color: "#1976d2" },
+              }}
             />
           </Box>
 
-          <Divider sx={{ my: 1 }} />
+          <Divider sx={{ my: 1, borderColor: "rgba(0, 0, 0, 0.08)" }} />
 
-          {/* Список сообщений */}
-          <ChatMessages
-            messages={messages}
-            loadingFetchMessages={loadingFetchMessages}
-            loadingPagination={loadingPagination}
-            linkPagination={linkPagination}
-            isInitialScrollDone={isInitialScrollDone}
-            scrollContainerRef={scrollContainerRef}
-            onScroll={handleScroll}
-            onFetchNextPage={() => fetchNextPage(scrollContainerRef.current)}
-            formatTime={formatTime}
-            getAvatarColor={getAvatarColor}
-          />
+          <Box
+            sx={{
+              flexGrow: 1,
+              minHeight: 0,
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              my: 1,
+              p: 2,
+              borderRadius: 3,
+              backgroundColor: "rgba(255, 255, 255, 0.45)",
+              backdropFilter: "blur(25px)",
+              border: "1px solid rgba(0, 0, 0, 0.06)",
+              boxShadow: "inset 0 0 10px rgba(0, 0, 0, 0.02)",
+            }}
+          >
+            <ChatMessages
+              messages={messages}
+              loadingFetchMessages={loadingFetchMessages}
+              loadingPagination={loadingPagination}
+              linkPagination={linkPagination}
+              isInitialScrollDone={isInitialScrollDone}
+              scrollContainerRef={scrollContainerRef}
+              onScroll={handleScroll}
+              onFetchNextPage={() => fetchNextPage(scrollContainerRef.current)}
+              formatTime={formatTime}
+              getAvatarColor={getAvatarColor}
+            />
+          </Box>
 
           {/* Кнопка прыжка вниз */}
           <JumpToBottomButton
@@ -153,8 +205,8 @@ const App: React.FC = () => {
             onClick={handleJumpClick}
           />
 
-          {/* Поле ввода */}
-          <Box sx={{ display: "flex", gap: 2, alignItems: "flex-end" }}>
+          {/* Поле ввода сообщения */}
+          <Box sx={{ display: "flex", gap: 2, alignItems: "flex-end", mt: 1 }}>
             <TextField
               fullWidth
               multiline
@@ -166,26 +218,73 @@ const App: React.FC = () => {
               onKeyDown={handleKeyPress}
               disabled={!username}
               size="medium"
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              sx={{
+                backgroundColor: "rgba(255, 255, 255, 0.6)",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3,
+                  color: "#1e293b",
+                  padding: "14px",
+                  "& fieldset": { borderColor: "rgba(0, 0, 0, 0.12)" },
+                  "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.25)" },
+                  "&.Mui-focused fieldset": { borderColor: "#1976d2" },
+                },
+              }}
             />
             <Button
               variant="contained"
               onClick={handleSendMessage}
               disabled={!inputMessage.trim() || !username}
-              sx={{ minWidth: 100, height: 56, borderRadius: 2, gap: 1 }}
+              sx={{
+                minWidth: 120,
+                height: 54,
+                borderRadius: 3,
+                gap: 1,
+                backgroundColor: "#1976d2",
+                color: "#fff",
+                fontWeight: "bold",
+                textTransform: "none",
+                "&:hover": {
+                  backgroundColor: "#115293",
+                  boxShadow: "0 4px 12px rgba(25, 118, 210, 0.2)",
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "rgba(0, 0, 0, 0.06)",
+                  color: "rgba(0, 0, 0, 0.26)",
+                },
+              }}
               endIcon={<SendIcon />}
             >
               Отправить
             </Button>
           </Box>
 
-          {/* Счётчик сообщений */}
-          <Box sx={{ mt: 1, display: "flex", justifyContent: "space-between" }}>
-            <Typography variant="caption" color="textSecondary">
+          {/* Счётчик и системные алерты */}
+          <Box
+            sx={{
+              mt: 1.5,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              minHeight: "24px",
+            }}
+          >
+            <Typography variant="caption" sx={{ color: "rgba(0, 0, 0, 0.5)" }}>
               Сообщений: {messages.length}
             </Typography>
             {!username && (
-              <Alert severity="info" sx={{ py: 0 }}>
+              <Alert
+                severity="info"
+                icon={false}
+                sx={{
+                  py: 0,
+                  px: 1.5,
+                  borderRadius: 1.5,
+                  backgroundColor: "rgba(2, 136, 209, 0.08)",
+                  color: "#0288d1",
+                  border: "1px solid rgba(2, 136, 209, 0.15)",
+                  fontSize: "0.75rem",
+                }}
+              >
                 Введите имя для отправки сообщений
               </Alert>
             )}

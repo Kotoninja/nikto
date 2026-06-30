@@ -49,27 +49,46 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
       sx={{
         flex: 1,
         overflowY: "auto",
-        mb: 2,
-        p: 2,
-        bgcolor: "#f5f5f5",
-        borderRadius: 1,
-        minHeight: 200,
-        maxHeight: "calc(100vh - 350px)",
+        p: 1, // Небольшой внутренний отступ для контента
+        bgcolor: "transparent", // Убрали белый/серый цвет, теперь тут идеальная темнота
+        height: "100%",
         display: loadingFetchMessages ? "flex" : "block",
         alignItems: loadingFetchMessages ? "center" : undefined,
         justifyContent: loadingFetchMessages ? "center" : undefined,
+
+        // Кастомный красивый скроллбар (Cyber-scroll)
+        "&::-webkit-scrollbar": {
+          width: "6px",
+        },
+        "&::-webkit-scrollbar-track": {
+          background: "transparent",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          background: "rgba(255, 255, 255, 0.1)",
+          borderRadius: "10px",
+          "&:hover": {
+            background: "rgba(57, 255, 19, 0.3)", // Легкая неоновая подсветка при наведении на скролл
+          },
+        },
       }}
     >
       {loadingFetchMessages ? (
-        <CircularProgress aria-label="Loading…" />
+        <CircularProgress sx={{ color: "#39FF14" }} aria-label="Loading…" />
       ) : (
         <Stack spacing={2}>
           {linkPagination && (
             <Box
               ref={ref}
-              sx={{ height: 1, display: "flex", justifyContent: "center" }}
+              sx={{
+                height: 1,
+                display: "flex",
+                justifyContent: "center",
+                py: 1,
+              }}
             >
-              {loadingPagination && <CircularProgress size={20} />}
+              {loadingPagination && (
+                <CircularProgress size={20} sx={{ color: "#39FF14" }} />
+              )}
             </Box>
           )}
           {messages.map((message) => (
