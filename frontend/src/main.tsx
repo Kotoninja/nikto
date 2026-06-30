@@ -16,7 +16,7 @@ createRoot(document.getElementById("root")!).render(
       <PixelBlast
         variant="square"
         pixelSize={5}
-        color="#39FF14"
+        color="#000000"
         patternScale={2}
         patternDensity={1}
         enableRipples
