@@ -19,3 +19,6 @@ docker-compose exec backend python manage.py migrate
 ```
 
 ### Next move: open http://localhost:3000/
+
+## Photos
+![](photos/image.png)
